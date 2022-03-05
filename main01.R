@@ -38,6 +38,11 @@ for( t in 1:generation){
     }
   }
   
+  # searching extinct patches  
+  extinctPatch <- which(graphics_patch > 0.5, arr.ind=TRUE)
+  patch[extinctPatch[,1], extinctPatch[,2]] <- 0 
+  graphics_patch[extinctPatch[,1], extinctPatch[,2]] <- NA  
+  
   # searching filled patches  
   filledPatch <- which(patch > 0, arr.ind=TRUE)
   #print( filledPatch )
@@ -77,28 +82,44 @@ for( t in 1:generation){
       
       graphics_patch[filledPatch[k,1], filledPatch[k,2]] <- sumInter/9
     } 
-    
-    # graphics 
-    png( paste( paste( parePath, paste("patch", formatC(t,width=6,flag="0"), sep="_"), sep="/result_patch/" ), "png", sep="."), 
-         width=6, height=5, units = "in", res=300 
-        )
-    par(mar=c(5.5, 6.0, 4, 2)) # margin
-    
-    # originalParetto <- 
-    #image.plot( graphics_patch, col= originalParetto(9) )
-    
-    par(ps=20)
-    
-    xAxis<-10
-    yAxis<-10 # yMax
-    colnames <- paste0("",c(seq(1, num, by=((num-1)/xAxis) )) )
-    rownames <- paste0("",c(seq(1, num, by=((num-1)/yAxis) )) )
-    
-    image.plot( graphics_patch, zlim=c(0,1), # xaxt="n", yaxt="n", 
-                xlab="x", ylab="y", main=paste("Generation t =", formatC(t,width=6,flag="0") ) 
-              )
-    dev.off()
-    
   }
+  
+  # graphics 
+  png( paste( paste( parePath, paste("patch", formatC(t,width=6,flag="0"), sep="_"), sep="/result_patch/" ), "png", sep="."), 
+       width=6, height=5, units = "in", res=300 
+  )
+  par(mar=c(5.5, 6.0, 4, 2)) # margin
+  
+  # originalParetto <- 
+  #image.plot( graphics_patch, col= originalParetto(9) )
+  
+  par(ps=20)
+  
+  xAxis<-num-1
+  yAxis<-num-1 # yMax
+  colnames <- paste0("", c(seq(1, num, by=((num-1)/xAxis) )) )
+  rownames <- paste0("", c(seq(1, num, by=((num-1)/yAxis) )) )
+  
+  #image( graphics_patch, col=rainbow(25), axes=F, 
+  #       xlab="x", ylab="y", main=paste("Generation t =", formatC(t,width=6,flag="0") )
+  #      ) #redblue() doesn't work on my computer.
+  #axis(side=2,at=1:num,labels=rownames)
+  #axis(side=1,at=1:num,labels=colnames)
+  #image.plot(sample, legend.only=T)
+  
+  image.plot( graphics_patch, zlim=c(0,1), # xaxt="n", yaxt="n", 
+              xlab="x", ylab="y", main=paste("Generation t =", formatC(t,width=6,flag="0") ) 
+            )
+  # filledPatch <- which(graphics_patch > 0, arr.ind=TRUE)
+  for ( i in 1:nrow(filledPatch) ) {
+    text( (filledPatch[i,1]-1)/(num-1), (filledPatch[i,2]-1)/(num-1), as.character(patch[filledPatch[i,1],filledPatch[i,2]]),
+          col="white", font=2
+    )  # This is dummy, but required for drawing axis
+  }
+  #axis(side=2,at=1:num,labels=rownames)
+  #axis(side=1,at=1:num,labels=colnames)
+  
+  dev.off()
+  
 }
 print( "simulation completed!" )

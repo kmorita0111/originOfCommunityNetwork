@@ -1,5 +1,7 @@
 # figures
 *.png
+*.gif
+result_patch*/
 
 # project file
 *.Rproj
