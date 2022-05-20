@@ -9,14 +9,30 @@ sumOfPatch <- num*num
 numOfRow <- 1:num
 numOfLine <- 1:num
 
-generation <- 100
+generation <- 500
 
 patch <- matrix(0, num, num) 
 graphics_patch <- matrix(NA, num, num) 
 interaction <- matrix(0, generation, generation)
 
+orderDist <- matrix( 0, generation+1, 9 )
+
 ###--- working directory ---###
 parePath = "~/originOfCommunityNetwork"
+
+###--- initial order distribution ---###
+png( paste( paste( parePath, paste("patch", formatC(0,width=6,flag="0"), sep="_"), sep="/result_orderDist/" ), "png", sep="."), 
+     width=6, height=5, units = "in", res=300 
+    )
+par(mar=c(5.5, 6.0, 4, 2)) # margin
+
+plot( 1:9, orderDist[1,], 
+      xlim = c(1,9), ylim = c(0,1), 
+      type = "o", lwd=3, 
+      xlab = paste( expression( "Order, ", k ) ), ylab = paste( expression( "Frequency, ", p ) )
+    )
+
+dev.off()
 
 ###--- load library ---###
 library(maps)
@@ -24,6 +40,8 @@ library(fields)
 
 ###--- simulation ---###
 for( t in 1:generation){
+  
+  print( paste( "t =", as.character(t) ) )
   
   # immigration 
   for( i in 1:sumOfPatch ){
@@ -84,10 +102,10 @@ for( t in 1:generation){
     } 
   }
   
-  # graphics 
+  ###=== graphics ===###
   png( paste( paste( parePath, paste("patch", formatC(t,width=6,flag="0"), sep="_"), sep="/result_patch/" ), "png", sep="."), 
        width=6, height=5, units = "in", res=300 
-  )
+      )
   par(mar=c(5.5, 6.0, 4, 2)) # margin
   
   # originalParetto <- 
@@ -111,13 +129,36 @@ for( t in 1:generation){
               xlab="x", ylab="y", main=paste("Generation t =", formatC(t,width=6,flag="0") ) 
             )
   # filledPatch <- which(graphics_patch > 0, arr.ind=TRUE)
+  par(ps=15)
   for ( i in 1:nrow(filledPatch) ) {
     text( (filledPatch[i,1]-1)/(num-1), (filledPatch[i,2]-1)/(num-1), as.character(patch[filledPatch[i,1],filledPatch[i,2]]),
           col="white", font=2
-    )  # This is dummy, but required for drawing axis
+        )  # This is dummy, but required for drawing axis
   }
   #axis(side=2,at=1:num,labels=rownames)
   #axis(side=1,at=1:num,labels=colnames)
+  
+  dev.off()
+  
+  ###--- order distribution ---###
+  graphics_patch2 <- graphics_patch
+  graphics_patch2[which( is.na( graphics_patch2 ) )] <- 0
+  for ( numOforder in 1:9 ) {
+    orderDist[(t+1), numOforder] <- sum( graphics_patch2*9 == numOforder )
+  }
+  orderDist[(t+1),] <- orderDist[(t+1),]/sum( graphics_patch2 > 0 )
+  
+  png( paste( paste( parePath, paste("orderDist", formatC(t,width=6,flag="0"), sep="_"), sep="/result_orderDist/" ), "png", sep="."), 
+       width=6, height=5, units = "in", res=300 
+     )
+  par(mar=c(5.5, 6.0, 4, 2)) # margin
+  
+  plot( 1:9, orderDist[(t+1),], 
+        xlim = c(1,9), ylim = c(0,1), 
+        type = "o", lwd=3, 
+        xlab = paste( expression( "Order, ", k ) ), ylab = paste( expression( "Frequency, ", p ) ), 
+        main=paste("Generation t =", formatC(t,width=6,flag="0") ) 
+      )
   
   dev.off()
   

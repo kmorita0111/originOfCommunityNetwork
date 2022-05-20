@@ -2,6 +2,7 @@
 *.png
 *.gif
 result_patch*/
+.DS_Store
 
 # project file
 *.Rproj
